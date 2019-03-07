@@ -32,7 +32,7 @@ library(ggalluvial) # Sankeys (on CRAN)
 library(readxl) # Get .xls (on CRAN)
 library(praise) # Get/share praise! 
 
-# Note: may need to update dependencies (I usually choose yes to all...)
+# Note: may need to update dependencies (I usually choose yes to all...) # yep, I did this
 
 
 ```
@@ -49,28 +49,33 @@ Get the data
 lm_df <- read.gml("lesmis.gml")
 
 # Convert to graph (igraph) with nodes & edges
-les_mis <- graph_from_data_frame(lm_df, directed = FALSE)
-beep(sound = 2)
+les_mis <- graph_from_data_frame(lm_df, directed = FALSE) # directed = FALSE, no directionality in the graph theory
+beep(sound = 8) # AMAZING # this will let you know when your long code has run!
+praise()
 
 ```
 
-Find some quantitative metrics:
+Find some quantitative metrics of graphs (graph theory graphs, not charts):
 ```{r}
 
+# These are functions built into the graph theory packages to help learn about the data
+
 #Graph diameter:
-diameter(les_mis) # Smallest maximum distance (links)
+diameter(les_mis) # Smallest maximum distance (links) between any two characters in Les Mis, the farthest separation is 5
 
 # Farthest vertices
-farthest_vertices(les_mis)
+farthest_vertices(les_mis) # between Napoleon and Jondrette
 
 
 ```
-
 
 Plot it: 
 ```{r}
+
 # Alternatively, get the graph data as igraph right away with igraph::read_graph()
 # les_mis <- read_graph("lesmis.gml", format = "gml")
+
+plot(les_mis) # looks like a nightmare
 
 plot(les_mis,
      vertex.color = "orange",
@@ -94,17 +99,17 @@ Want to do it more in the style of ggplot? Use ggraph.
 
 # Then plot it
 ggraph(les_mis, layout = 'kk') +
-  geom_edge_link() +
+  geom_edge_link() +  # lines between things
   geom_node_text(aes(label = name), size = 2, color = "white") +
   theme_dark()
 
-# Or an arc graph: 
+# Or an arc graph: # THIS IS SO FUN
 ggraph(les_mis, layout = "linear") + 
   geom_edge_arc(alpha = 0.8) + 
   geom_node_text(aes(label = name), angle = 90, size = 2, hjust = 1) +
-  theme_graph()
+  theme_graph() # takes out the unnecessary parts of a network graph
 
-# Try layout = "circle", "tree"
+# Try layout = "circle", "tree" # coerced into circular format
 ggraph(les_mis, layout = "tree") +
   geom_edge_fan(color = "gray90") + 
   geom_node_text(aes(label = name), size = 2, color = "black", angle = 45) +
@@ -114,12 +119,14 @@ ggraph(les_mis, layout = "tree") +
 
 One like the layouts you're probably most used to seeing: 
 ```{r, fig.height = 6, fig.width = 6}
+
+# SO COOL
 # And a circular form of linear arcs:
 
-ggraph(les_mis, layout = "linear", circular = TRUE) +
+ggraph(les_mis, layout = "linear", circular = TRUE) + # layout = "linear" mean plot like a line, then make it circular
   geom_edge_arc(alpha = 0.5) +
   geom_node_point(aes(colour = name), show.legend = FALSE) +
-  geom_node_text(aes(label = name), size = 3, hjust = "outward") +
+  geom_node_text(aes(label = name), size = 3, hjust = "outward") + # hjust outward is very helpful, we could adjust outward even more
   theme_void()
   
 
@@ -128,7 +135,7 @@ ggraph(les_mis, layout = "linear", circular = TRUE) +
 ###Part 2. Sankey diagrams showing flows
 
 Note: there are other options for creating Sankey diagrams. 
-Other packages to look into for Sankeys: alluvial, ggalluvial, NetworkD3
+Other packages to look into for Sankeys: alluvial, ggalluvial, NetworkD3, ggforce
 
 Wikipedia: "Sankey diagrams are a specific type of flow diagram, in which the width of the arrows is shown proportionally to the flow quantity."
 
@@ -146,10 +153,12 @@ Then plot it with ggalluvial:
 A cool resource: <https://matthewdharris.com/2017/11/11/a-brief-diversion-into-static-alluvial-sankey-diagrams-in-r/>
 ```{r}
 
-ggplot(sdf, aes(y = weight, axis1 = before, axis2 = after)) +
+# ggalluvial package works within ggplot
+
+ggplot(sdf, aes(y = weight, axis1 = before, axis2 = after)) + # there can be more than two axes
   geom_alluvium(aes(fill = before, color = before), show.legend = FALSE, width = 1/5) +
-  geom_stratum(width = 1/5, color = "gray") +
-  geom_text(stat = "stratum", label.strata = TRUE) +
+  geom_stratum(width = 1/5, color = "gray") + # bins
+  geom_text(stat = "stratum", label.strata = TRUE) + # bins with labels so we know where things are flowing
   scale_fill_manual(values = c("purple","blue","green")) +
   scale_color_manual(values = c("purple","blue","green")) +
   scale_x_discrete(limits = c("Before", "After"), expand = c(0,0)) +
@@ -165,13 +174,14 @@ A tibble is like a data frame with a little more functionality. From r4ds: "Tibb
 
 ```{r}
 
+# Make a little tibble - this is useful for making a little dataframe in order to practice stuff!
+
 my_tibble <- tribble(
-  ~allison, ~made, ~this, ~table,
-  1,"yes",0,10000,
-  2,"no",10, 20000,
-  3,"maybe",20, 5000,
-  4,"yes",15, 12000,
-  5,"no",25, 18000
+  ~hanna, ~made, ~this, ~awesomething,
+  1, "yes", 0, 10000,
+  2, "no", 4, 50000,
+  3, "no", 10, 40000,
+  4, "maybe", 9, 15000
 )
 
 # Then it just works like anything else...
@@ -182,7 +192,12 @@ ggplot(my_tibble, aes(x = allison, y = table)) +
 
 ```
 
+Check out Jenny Bryan's awesome package, 'reprex'
+This is important because if you are getting help from an outside source, they don't have your data or your file paths. This can help you create a small, reproducible example of a line that doesn't work. Tribble() can help you make a little df that they can work with.
+
 ####3b. But now, datapasta! 
+
+Can I copy and paste data from outside sources and have R store it in a dataframe? Sometimes!
 
 Cool, so I can make my own data frames (tibbles) right here in R in a really intuitive way. But a lot of times there's data somewhere that we want in R, but it doesn't exist in a super useful format online. That's annoying. Luckily for us, there's *datapasta*!
 
@@ -200,6 +215,8 @@ Go to page on "How to datapasta:" <https://cran.r-project.org/web/packages/datap
 
 ```{r}
 
+# there is no way to link this to an updated data source, so be careful # always keep a record with metadata and store this as a csv
+
 weather_data <- tibble::tribble(
                                 ~X,          ~Location, ~Min, ~Max,
                   "Partly cloudy.",         "Brisbane",  19L,  29L,
@@ -215,8 +232,10 @@ weather_data <- tibble::tribble(
                   "Partly cloudy.",        "Redcliffe",  19L,  27L
   )
 
+
 weather_data <- rename(weather_data, Condition = X)
 
+write_csv(hanna_datapasta, "hanna_storing_things.csv") # this can be pushed back to github, and make a txt file with metadata
 ```
 
 You can also do this from things like an Excel file. Open the PesticideResidues.xls file on your computer. Select a subset of the cells (don't include headers for this example). Then use datapasta to create a tibble from it in R (remember, my shortcut is Control + Shift + t): 
@@ -246,17 +265,46 @@ pest_sub <- tibble::tribble(
 
 ```
 
-####3c. Beautiful tables with gt
+####3c. Beautiful customized tables with gt
+
+R is lacking in creating beautiful tables
 
 The *gt* package by Rich Iannone is awesome (<https://github.com/rstudio/gt>). 
 
 Cool, so *gt* just works...
 ```{r}
 weather_data %>% 
-  gt()
+  gt() %>% 
+  tab_header(
+    title = "Pretty cool table",
+    subtitle = "Made a subtitle"
+  ) %>% 
+  fmt_number(
+    columns = vars(Min),
+    decimals = 2 # omg
+  ) %>% 
+  cols_move_to_start(
+    column = vars(Location)
+  ) %>% 
+  data_color(
+    columns = vars(Min),
+    colors = scales::col_numeric(
+      palette = c(
+        "darkblue", "blue"),
+      domain = c(14,20)
+  )
+  ) %>% 
+  tab_options(
+    table.background.color = "purple",
+    heading.background.color = "orange",
+    column_labels.background.color = "pink"
+  )
+  
+  
+  
 ```
 
-Or make it way better: 
+Or make it way better (Allison's code from the key: 
 
 <https://gt.rstudio.com/reference/tab_options.html>
 
@@ -314,6 +362,8 @@ See more examples here:
 
 ###3d. Reading in straight from a URL
 
+Make sure you read in and keep a history of dates, etc. so that you can update.
+
 Google then direct to get to the UCI Machine Learning data for auto-mpg. Then read it in via the URL. 
 Make sure to ask yourself: why is this convenient but risky? 
 
@@ -324,7 +374,10 @@ Make sure to ask yourself: why is this convenient but risky?
 
 Note: don't want to have reading from URL in document that's knitting (requires connection)...? Depends.
 ```{r}
-# nuclear <- read_delim("https://www.nrc.gov/reading-rm/doc-collections/event-status/reactor-status/PowerReactorStatusForLast365Days.txt", delim = "|", col_names = TRUE)
+
+# WOW
+
+#nuclear <- read_delim("https://www.nrc.gov/reading-rm/doc-collections/event-status/reactor-status/PowerReactorStatusForLast365Days.txt", delim = "|", col_names = TRUE)
 
 # Because you always want a version of what you were working with, I recommend writing that to a csv (or a text file, or whatever)
 
@@ -334,7 +387,7 @@ Note: don't want to have reading from URL in document that's knitting (requires 
 
 But that also works if it's in your working directory...
 
-###3e. Reading in Excel files (and skipping top rows metadata)
+###3e. Reading in Excel files (and skipping top rows metadata) OH MY GOSH YES
 
 Easy to read in Excel files (respecting the classes):
 ```{r}
@@ -344,6 +397,8 @@ pesticides <- read_xls("PesticideResidues.xls")
 # Dang, there are two extra rows with information in them. Bummer. But: 
 
 pest2 <- read_xls("PesticideResidues.xls", skip = 2, col_names = TRUE) # Ta da! 
+
+# this means that all data wrangling is happening in R which is more reproducible
 
 pest <- pest2 %>% 
   janitor::clean_names()
@@ -357,10 +412,14 @@ Some wrangling of the pesticide data:
 ```{r}
 
 crops <- pest %>% 
-  filter(commodity == "KALE",!is.na(grower_city)) %>% 
-  separate(grower_city, c("grow_city","grow_state"), sep = ",") %>% 
-  separate(collection_site_city, c("market_city","market_state"), sep = ",") %>% 
-  group_by(organic_commodity, grow_city, market_city) %>% 
+  filter(commodity == "KALE", !is.na(grower_city)) %>% 
+  separate(grower_city, 
+           c("grow_city","grow_state"), 
+           sep = ",") %>% # from 'str' package # break up column into two columns (any state information)
+  separate(collection_site_city, 
+           c("market_city","market_state"), 
+           sep = ",") %>% 
+  group_by(organic_commodity, grow_city, market_city) %>% # very different df, but more useful
   tally()
 
 ```
@@ -377,6 +436,8 @@ ggplot(crops, aes(y = n, axis1 = organic_commodity, axis2 = grow_city, axis3 = m
   scale_x_discrete(limits = c("status", "grown","market"), expand = c(0,0)) +
   scale_y_continuous(expand = c(0,0)) +
   theme_bw()
+beep(sound = 11)
+
 
 ```
 
